@@ -160,10 +160,15 @@ class MyABC(ABC):
     pass
 
 from io import StringIO
+
 MyABC.register(StringIO)
+
+
+# StringIO is a "virtual subclass" of MyABC
+isinstance(StringIO("abc"), MyABC)
 ```
 
-    _io.StringIO
+    True
 
 The key difference is that you can specify the virtual subclass using
 the tuple `("<mod_name>", "<class_name>")`.
