@@ -7,7 +7,15 @@ actions over optional dependencies.
 
 ## Example
 
+For this example, we’ll implement a function, `fill_na()`, that fills in
+missing values in a DataFrame. It works with DataFrame objects from two
+popular libraries: `pandas` and `polars`. Importantly, neither library
+needs to be installed.
+
 ### Setup
+
+The code below defines “abstract” parent classes for each of the
+DataFrame classes in the two libraries.
 
 ``` python
 from databackend import AbstractBackend
@@ -18,8 +26,12 @@ class AbstractPandasFrame(AbstractBackend):
 
 class AbstractPolarsFrame(AbstractBackend):
     _backends = [("polars", "DataFrame")]
+```
 
+Note that the abstract classes can be used as stand-ins for the real
+thing in `issubclass()` and `isinstance`.
 
+``` python
 from pandas import DataFrame
 
 issubclass(DataFrame, AbstractPandasFrame)
@@ -28,7 +40,7 @@ isinstance(DataFrame(), AbstractPandasFrame)
 
     True
 
-### Simple use: isinstance to switch behavior
+### Simple fill_na: isinstance to switch behavior
 
 The `fill_na()` function below can handle both pandas and polars
 DataFrames.
@@ -131,7 +143,7 @@ The key here is that a user could have only pandas, or only polars,
 installed. Importantly, doing the isinstance checks do not import any
 libraries!
 
-### Advanced use: generic function dispatch
+### Advanced fill_na: generic function dispatch
 
 `databackend` shines when combined with [generic function
 dispatch](https://mchow.com/posts/2020-02-24-single-dispatch-data-science/).
