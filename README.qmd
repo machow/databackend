@@ -45,7 +45,7 @@ isinstance(DataFrame(), AbstractPandasFrame)
 
 ### Simple fill_na: isinstance to switch behavior
 
-The `fill_na()` function below can handle both pandas and polars DataFrames.
+The `fill_na()` function below uses custom handling for pandas and polars.
 
 ```{python}
 def fill_na(data, x):
