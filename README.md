@@ -95,7 +95,7 @@ This is a programming approach where you declare a function
 implementation on the function.
 
 Python has a built-in function implementing this called
-`functools.singledispatch`.
+[`functools.singledispatch`](https://docs.python.org/3/library/functools.html#functools.singledispatch).
 
 Here is an example of the previous `fill_na()` function written using
 it.
