@@ -47,10 +47,12 @@ polars.
 
 ``` python
 def fill_na(data, x):
-    if isinstance(data, AbstractPandasFrame):
-        return data.fillna(x)
-    elif isinstance(data, AbstractPolarsFrame):
+    if isinstance(data, AbstractPolarsFrame):
         return data.fill_nan(x)
+    elif isinstance(data, AbstractPandasFrame):
+        return data.fillna(x)
+    else:
+        raise NotImplementedError()
 ```
 
 Notice that neither `pandas` nor `polars` need to be imported when
@@ -59,85 +61,26 @@ defining `fill_na()`.
 Here is an example of calling `fill_na()` on both kinds of DataFrames.
 
 ``` python
-# handle pandas ----
-
-import pandas as pd
-
-df = pd.DataFrame({"x": [1, 2, None]})
-fill_na(df, 3)
-
-
-# handle polars ----
+# test polars ----
 
 import polars as pl
 
 df = pl.DataFrame({"x": [1, 2, None]})
 fill_na(df, 3)
+
+
+# test pandas ----
+
+import pandas as pd
+
+df = pd.DataFrame({"x": [1, 2, None]})
+fill_na(df, 3)
 ```
 
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-
-    .dataframe td {
-        white-space: pre;
-    }
-
-    .dataframe td {
-        padding-top: 0;
-    }
-
-    .dataframe td {
-        padding-bottom: 0;
-    }
-
-    .dataframe td {
-        line-height: 95%;
-    }
-</style>
-<table border="1" class="dataframe" >
-<small>shape: (3, 1)</small>
-<thead>
-<tr>
-<th>
-x
-</th>
-</tr>
-<tr>
-<td>
-i64
-</td>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-1
-</td>
-</tr>
-<tr>
-<td>
-2
-</td>
-</tr>
-<tr>
-<td>
-null
-</td>
-</tr>
-</tbody>
-</table>
-</div>
+         x
+    0  1.0
+    1  2.0
+    2  3.0
 
 The key here is that a user could have only pandas, or only polars,
 installed. Importantly, doing the isinstance checks do not import any
@@ -164,15 +107,19 @@ from functools import singledispatch
 def fill_na2(data, x):
     raise NotImplementedError(f"No support for class: {type(data)}")
 
+
+# handle polars ----
+
+@fill_na2.register
+def _(data: AbstractPolarsFrame, x):
+    return data.fill_nan(x)
+
+
 # handle pandas ----
 
 @fill_na2.register
 def _(data: AbstractPandasFrame, x):
     return data.fillna(x)
-
-@fill_na2.register
-def _(data: AbstractPolarsFrame, x):
-    return data.fill_nan(x)
 ```
 
 Note two important decorators:
@@ -189,76 +136,17 @@ Here’s an example of it in action.
 import pandas as pd
 import polars as pl
 
-df = pd.DataFrame({"x": [1, 2, None]})
+df = pl.DataFrame({"x": [1, 2, None]})
 fill_na2(df, 3)
 
-df = pl.DataFrame({"x": [1, 2, None]})
+df = pd.DataFrame({"x": [1, 2, None]})
 fill_na2(df, 3)
 ```
 
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-
-    .dataframe td {
-        white-space: pre;
-    }
-
-    .dataframe td {
-        padding-top: 0;
-    }
-
-    .dataframe td {
-        padding-bottom: 0;
-    }
-
-    .dataframe td {
-        line-height: 95%;
-    }
-</style>
-<table border="1" class="dataframe" >
-<small>shape: (3, 1)</small>
-<thead>
-<tr>
-<th>
-x
-</th>
-</tr>
-<tr>
-<td>
-i64
-</td>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-1
-</td>
-</tr>
-<tr>
-<td>
-2
-</td>
-</tr>
-<tr>
-<td>
-null
-</td>
-</tr>
-</tbody>
-</table>
-</div>
+         x
+    0  1.0
+    1  2.0
+    2  3.0
 
 ### How it works
 

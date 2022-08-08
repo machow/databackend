@@ -5,6 +5,15 @@ format: gfm
 
 # databackend
 
+```{python}
+#| include: false
+# this keeps the pandas dataframe repr from spitting out scoped style tags
+# which don't render on github
+import pandas as pd
+pd.set_option("display.notebook_repr_html", False)
+
+```
+
 The `databackend` package allows you to register a subclass, without needing to import the subclass itself.
 This is useful for implementing actions over optional dependencies.
 
@@ -49,10 +58,12 @@ The `fill_na()` function below uses custom handling for pandas and polars.
 
 ```{python}
 def fill_na(data, x):
-    if isinstance(data, AbstractPandasFrame):
-        return data.fillna(x)
-    elif isinstance(data, AbstractPolarsFrame):
+    if isinstance(data, AbstractPolarsFrame):
         return data.fill_nan(x)
+    elif isinstance(data, AbstractPandasFrame):
+        return data.fillna(x)
+    else:
+        raise NotImplementedError()
 
 ```
 
@@ -61,19 +72,19 @@ Notice that neither `pandas` nor `polars` need to be imported when defining `fil
 Here is an example of calling `fill_na()` on both kinds of DataFrames.
 
 ```{python}
-# handle pandas ----
-
-import pandas as pd
-
-df = pd.DataFrame({"x": [1, 2, None]})
-fill_na(df, 3)
-
-
-# handle polars ----
+# test polars ----
 
 import polars as pl
 
 df = pl.DataFrame({"x": [1, 2, None]})
+fill_na(df, 3)
+
+
+# test pandas ----
+
+import pandas as pd
+
+df = pd.DataFrame({"x": [1, 2, None]})
 fill_na(df, 3)
 ```
 
@@ -98,15 +109,20 @@ from functools import singledispatch
 def fill_na2(data, x):
     raise NotImplementedError(f"No support for class: {type(data)}")
 
+
+# handle polars ----
+
+@fill_na2.register
+def _(data: AbstractPolarsFrame, x):
+    return data.fill_nan(x)
+
+
 # handle pandas ----
 
 @fill_na2.register
 def _(data: AbstractPandasFrame, x):
     return data.fillna(x)
 
-@fill_na2.register
-def _(data: AbstractPolarsFrame, x):
-    return data.fill_nan(x)
 ```
 
 Note two important decorators:
@@ -122,10 +138,10 @@ Here's an example of it in action.
 import pandas as pd
 import polars as pl
 
-df = pd.DataFrame({"x": [1, 2, None]})
+df = pl.DataFrame({"x": [1, 2, None]})
 fill_na2(df, 3)
 
-df = pl.DataFrame({"x": [1, 2, None]})
+df = pd.DataFrame({"x": [1, 2, None]})
 fill_na2(df, 3)
 ```
 
