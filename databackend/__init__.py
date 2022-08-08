@@ -1,7 +1,6 @@
 import sys
 import importlib
 
-from weakref import WeakKeyDictionary
 from abc import ABCMeta
 
 
@@ -22,12 +21,14 @@ class _AbstractBackendMeta(ABCMeta):
         cls._abc_caches_clear()
 
 
-
 class AbstractBackend(metaclass=_AbstractBackendMeta):
     @classmethod
     def __subclasshook__(cls, subclass):
         for mod_name, cls_name in cls._backends:
-            if not mod_name in sys.modules:
+            if mod_name not in sys.modules:
+                # module isn't loaded, so it can't be the subclass
+                # we don't want to import the module to explicitly run the check
+                # so skip here.
                 continue
             else:
                 target_cls = _load_class(mod_name, cls_name)

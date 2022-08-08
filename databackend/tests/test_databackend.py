@@ -8,6 +8,7 @@ from databackend.tests.a_data_class import ADataClass
 CLASS_MOD = "databackend.tests.a_data_class"
 CLASS_NAME = "ADataClass"
 
+
 @pytest.fixture
 def Base():
     class Base(AbstractBackend):
@@ -19,7 +20,8 @@ def Base():
 
 
 def test_check_unimported_mod(Base):
-    class ABase(AbstractBackend): pass
+    class ABase(AbstractBackend):
+        pass
 
     mod_name = "databackend.tests.an_unimported_module"
     ABase.register_backend(mod_name, "UnimportedClass")
@@ -40,7 +42,7 @@ def test_issubclass(Base):
 
 def test_isinstance(Base):
     assert isinstance(ADataClass(), Base)
-    
+
 
 def test_check_is_cached():
     checks = [0]
@@ -65,7 +67,6 @@ def test_check_is_cached():
 
 
 def test_backends_spec_at_class_declaration():
-
     class ABase(AbstractBackend):
         _backends = [(CLASS_MOD, CLASS_NAME)]
 

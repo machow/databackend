@@ -1,1 +1,2 @@
-class UnimportedClass: pass
+class UnimportedClass:
+    pass
