@@ -1,0 +1,81 @@
+---
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.14.1
+  kernelspec:
+    display_name: Python 3 (ipykernel)
+    language: python
+    name: python3
+---
+
+```{python}
+import numpy as np
+import pandas as pd
+
+from siuba.data import mtcars
+
+# imported from tidy.py in this folder
+from tidy import tidy
+```
+
+## fit statsmodels ----
+
+```{python}
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+
+results = smf.ols('mpg ~ hp', data=mtcars).fit()
+
+tidy_sm = tidy(results)
+
+tidy_sm
+```
+
+## fit scikit ----
+
+```{python}
+from sklearn.linear_model import LinearRegression
+
+X = mtcars[['hp']]
+y = mtcars['mpg']
+
+# y = 1 * x_0 + 2 * x_1 + 3
+reg = LinearRegression().fit(X, y)
+
+tidy_sk = tidy(reg)
+
+tidy_sk
+```
+
+## fit pymc3 ----
+
+```{python}
+from pymc3 import Model, HalfCauchy, Normal, sample
+
+x = mtcars['hp'].values
+y = mtcars['mpg'].values
+
+data = dict(x=x, y=y)
+
+np.random.seed(999999)
+with Model() as model: # model specifications in PyMC3 are wrapped in a with-statement
+    # Define priors
+    sigma = HalfCauchy('sigma', beta=10, testval=1.)
+    intercept = Normal('intercept', 0, sigma=20)
+    x_coeff = Normal('hp', 0, sigma=20)
+
+    # Define likelihood
+    likelihood = Normal('mpg', mu=intercept + x_coeff * x,
+                        sigma=sigma, observed= y)
+
+    # Inference!
+    trace = sample(500, cores=2, progressbar = False) # draw 3000 posterior samples using NUTS sampling
+    
+tidy_pymc3 = tidy(trace)
+
+tidy_pymc3
+```
