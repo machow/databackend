@@ -5,12 +5,15 @@ import importlib
 from databackend import AbstractBackend
 from databackend.tests.a_data_class import ADataClass
 
+CLASS_MOD = "databackend.tests.a_data_class"
+CLASS_NAME = "ADataClass"
+
 @pytest.fixture
 def Base():
     class Base(AbstractBackend):
         pass
 
-    Base.register_backend("databackend.tests.a_data_class", "ADataClass")
+    Base.register_backend(CLASS_MOD, CLASS_NAME)
 
     return Base
 
@@ -61,3 +64,9 @@ def test_check_is_cached():
     assert checks[0] == 1
 
 
+def test_backends_spec_at_class_declaration():
+
+    class ABase(AbstractBackend):
+        _backends = [(CLASS_MOD, CLASS_NAME)]
+
+    assert issubclass(ADataClass, ABase)

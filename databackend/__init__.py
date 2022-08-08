@@ -13,7 +13,8 @@ def _load_class(mod_name: str, cls_name: str):
 class _AbstractBackendMeta(ABCMeta):
     def __new__(mcls, clsname, bases, attrs):
         cls = super().__new__(mcls, clsname, bases, attrs)
-        cls._backends = []
+        if not hasattr(cls, "_backends"):
+            cls._backends = []
         return cls
 
     def register_backend(cls, mod_name: str, cls_name: str):
@@ -25,7 +26,6 @@ class _AbstractBackendMeta(ABCMeta):
 class AbstractBackend(metaclass=_AbstractBackendMeta):
     @classmethod
     def __subclasshook__(cls, subclass):
-        print("subclasshook", cls, subclass)
         for mod_name, cls_name in cls._backends:
             if not mod_name in sys.modules:
                 continue
