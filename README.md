@@ -40,6 +40,10 @@ isinstance(DataFrame(), AbstractPandasFrame)
 
     True
 
+> 📝 Note that you can use
+> `AbstractPandasFrame.register_backend("pandas", "DataFrame")`, as an
+> alternative way to register backends.
+
 ### Simple fill_na: isinstance to switch behavior
 
 The `fill_na()` function below uses custom handling for pandas and
