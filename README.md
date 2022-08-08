@@ -247,3 +247,34 @@ null
 </tbody>
 </table>
 </div>
+
+### How it works
+
+Under the hood, `AbstractBackend` behaves similarly to python’s builtin
+[`abc.ABC` class](https://docs.python.org/3/library/abc.html#abc.ABC).
+
+``` python
+from abc import ABC
+
+class MyABC(ABC):
+    pass
+
+from io import StringIO
+MyABC.register(StringIO)
+```
+
+    _io.StringIO
+
+The key difference is that you can specify the virtual subclass using
+the tuple `("<mod_name>", "<class_name>")`.
+
+When `issubclass(SomeClass, AbstractBackend)` runs, then…
+
+-   The standard ABC caching mechanism is checked, and potentially
+    returns the answer immediately.
+-   Otherwise, a subclass hook cycles through registered backends.
+-   The hook runs the subclass check for any backends that are imported
+    (e.g. are in `sys.modules`).
+
+Technically, `AbstractBackend` inherits all the useful metaclass things
+from `abc.ABCMeta`, so these can be used also.

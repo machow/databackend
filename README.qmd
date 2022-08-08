@@ -8,6 +8,7 @@ format: gfm
 The `databackend` package allows you to register a subclass, without needing to import the subclass itself.
 This is useful for implementing actions over optional dependencies.
 
+
 ## Example
 
 ### Setup
@@ -114,3 +115,27 @@ fill_na2(df, 3)
 df = pl.DataFrame({"x": [1, 2, None]})
 fill_na2(df, 3)
 ```
+
+### How it works
+
+Under the hood, `AbstractBackend` behaves similarly to python's builtin [`abc.ABC` class](https://docs.python.org/3/library/abc.html#abc.ABC).
+
+```{python}
+from abc import ABC
+
+class MyABC(ABC):
+    pass
+
+from io import StringIO
+MyABC.register(StringIO)
+```
+
+The key difference is that you can specify the virtual subclass using the tuple `("<mod_name>", "<class_name>")`.
+
+When `issubclass(SomeClass, AbstractBackend)` runs, then...
+
+* The standard ABC caching mechanism is checked, and potentially returns the answer immediately.
+* Otherwise, a subclass hook cycles through registered backends.
+* The hook runs the subclass check for any backends that are imported (e.g. are in `sys.modules`).
+
+Technically, `AbstractBackend` inherits all the useful metaclass things from `abc.ABCMeta`, so these can be used also.
