@@ -35,4 +35,3 @@ class AbstractBackend(metaclass=_AbstractBackendMeta):
                     return True
 
         return NotImplemented
-

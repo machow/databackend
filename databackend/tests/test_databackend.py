@@ -74,10 +74,11 @@ def test_backends_spec_at_class_declaration():
 
 
 def test_backends_do_not_overlap():
-    class ABase1(AbstractBackend): ...
+    class ABase1(AbstractBackend):
+        ...
 
-    class ABase2(AbstractBackend): ...
-
+    class ABase2(AbstractBackend):
+        ...
 
     ABase1.register_backend(CLASS_MOD, "ADataClass")
     ABase2.register_backend(CLASS_MOD, "ADataClass2")
@@ -88,7 +89,5 @@ def test_backends_do_not_overlap():
     assert isinstance(obj1, ABase1)
     assert not isinstance(obj1, ABase2)
 
-
     assert not isinstance(obj2, ABase1)
     assert isinstance(obj2, ABase2)
-
