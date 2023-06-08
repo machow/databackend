@@ -3,7 +3,7 @@ import sys
 import importlib
 
 from databackend import AbstractBackend
-from databackend.tests.a_data_class import ADataClass
+from databackend.tests.a_data_class import ADataClass, ADataClass2
 
 CLASS_MOD = "databackend.tests.a_data_class"
 CLASS_NAME = "ADataClass"
@@ -71,3 +71,23 @@ def test_backends_spec_at_class_declaration():
         _backends = [(CLASS_MOD, CLASS_NAME)]
 
     assert issubclass(ADataClass, ABase)
+
+
+def test_backends_do_not_overlap():
+    class ABase1(AbstractBackend):
+        ...
+
+    class ABase2(AbstractBackend):
+        ...
+
+    ABase1.register_backend(CLASS_MOD, "ADataClass")
+    ABase2.register_backend(CLASS_MOD, "ADataClass2")
+
+    obj1 = ADataClass()
+    obj2 = ADataClass2()
+
+    assert isinstance(obj1, ABase1)
+    assert not isinstance(obj1, ABase2)
+
+    assert not isinstance(obj2, ABase1)
+    assert isinstance(obj2, ABase2)
