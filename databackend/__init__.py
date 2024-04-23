@@ -1,3 +1,7 @@
+# Copyright (c) 2024 databackend contributors (MIT License)
+#
+# See https://github.com/machow/databackend
+
 import sys
 import importlib
 
