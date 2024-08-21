@@ -23,7 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         # Checks based on python versions ---
-        python-version: ['3.8', '3.9', '3.10']
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
       - uses: actions/checkout@v2
@@ -59,7 +59,6 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
-
 #  build-docs:
 #    name: "Build Docs"
 #    needs: ["run-if"]
