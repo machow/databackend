@@ -39,3 +39,4 @@ addopts = "--doctest-modules"
 doctest_optionflags = "NORMALIZE_WHITESPACE"
 
 [tool.flake8]
+max-line-length = 88
