@@ -74,11 +74,9 @@ def test_backends_spec_at_class_declaration():
 
 
 def test_backends_do_not_overlap():
-    class ABase1(AbstractBackend):
-        ...
+    class ABase1(AbstractBackend): ...
 
-    class ABase2(AbstractBackend):
-        ...
+    class ABase2(AbstractBackend): ...
 
     ABase1.register_backend(CLASS_MOD, "ADataClass")
     ABase2.register_backend(CLASS_MOD, "ADataClass2")

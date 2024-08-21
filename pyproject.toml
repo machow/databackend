@@ -40,3 +40,9 @@ doctest_optionflags = "NORMALIZE_WHITESPACE"
 
 [tool.flake8]
 max-line-length = 88
+
+ignore = [
+    "E702",    # multiple statements on one line (semicolon)
+    "E701",    # multiple statements on one line (colon)
+    "E704",    # multiple statements on one line (def)
+]
