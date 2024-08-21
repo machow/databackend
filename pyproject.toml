@@ -2,9 +2,40 @@
 requires = ["setuptools>=45", "wheel", "setuptools_scm>=6.2"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools_scm]
+
+[project]
+name = "databackend"
+description = "Abstract data dispatch"
+readme = "README.md"
+license.file = "LICENSE"
+authors = [
+    { name = "Michael Chow", email = "mc_al_github@fastmail.com" }
+]
+dynamic = ["version"]
+keywords = ["data"]
+classifiers = [
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12"
+]
+requires-python = ">=3.7"
+
+[project.urls]
+homepage = "https://github.com/machow/databackend"
+
+[project.optional-dependencies]
+dev = [
+    "pip-tools",
+    "pytest"
+]
+
 [tool.pytest.ini_options]
 testpaths = ["databackend"]
 addopts = "--doctest-modules"
 doctest_optionflags = "NORMALIZE_WHITESPACE"
 
-[tool.setuptools_scm]
+[tool.flake8]
