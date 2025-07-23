@@ -1,11 +1,18 @@
 
+
 # databackend
 
-The `databackend` package allows you to register a subclass, without
-needing to import the subclass itself. This is useful for implementing
-actions over optional dependencies.
+The `databackend` package allows you to work with optional Python
+dependencies. It supports two use cases:
 
-## Example
+- `isinstance` checks on optional classes. The `AbstractBackend` class
+  represents a class without ever needing to do an import. This is
+  useful for generic function dispatch (e.g. with
+  `functools.singledispatch`).
+- Lazy module imports. The `LazyImport` class represents a module, but
+  doesn’t import it until you access an attribute from it.
+
+## AbstractBackend Example
 
 For this example, we’ll implement a function, `fill_na()`, that fills in
 missing values in a DataFrame. It works with DataFrame objects from two
@@ -128,9 +135,9 @@ def _(data: AbstractPandasFrame, x):
 
 Note two important decorators:
 
--   `@singledispatch` defines a default function. This gets called if no
-    specific implementations are found.
--   `@fill_na2.register` defines specific versions of the function.
+- `@singledispatch` defines a default function. This gets called if no
+  specific implementations are found.
+- `@fill_na2.register` defines specific versions of the function.
 
 Here’s an example of it in action.
 
@@ -179,11 +186,61 @@ the tuple `("<mod_name>", "<class_name>")`.
 
 When `issubclass(SomeClass, AbstractBackend)` runs, then…
 
--   The standard ABC caching mechanism is checked, and potentially
-    returns the answer immediately.
--   Otherwise, a subclass hook cycles through registered backends.
--   The hook runs the subclass check for any backends that are imported
-    (e.g. are in `sys.modules`).
+- The standard ABC caching mechanism is checked, and potentially returns
+  the answer immediately.
+- Otherwise, a subclass hook cycles through registered backends.
+- The hook runs the subclass check for any backends that are imported
+  (e.g. are in `sys.modules`).
 
 Technically, `AbstractBackend` inherits all the useful metaclass things
 from `abc.ABCMeta`, so these can be used also.
+
+## LazyImport Example
+
+``` python
+from databackend import LazyImport
+
+pl = LazyImport("polars")            # no import yet
+
+def my_func():
+    return pl.DataFrame({"x": [1]})  # imports polars on first use
+```
+
+Generally, you would put the lazy import into a submodule. As a simple
+example, copy the code below into a file called `_dependencies.py`.
+
+### As a dependencies submodule
+
+\*\*\_dependencies.py\*\*:
+
+``` python
+from databackend import LazyImport
+
+pl = LazyImport("polars")
+```
+
+Then, copy the code below into a file called `main_module.py` in the
+same directory.
+
+**main_module.py**:
+
+``` python
+from _dependencies import pl
+
+def my_func():
+    return pl.DataFrame({"x": [1]})  # imports polars on first use
+```
+
+### Debugging
+
+Use the debug flag to make LazyImport error instead of performing the
+import. This is helpful for discovering where you’ve accidentally
+induced an import in your code.
+
+``` python
+from databackend import LazyImport
+
+pathlib = LazyImport("pathlib", debug=True)
+
+pathlib.__name__    # raises ImportError
+```
