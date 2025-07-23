@@ -34,6 +34,7 @@ def test_check_unimported_mod(Base):
     mod = importlib.import_module(mod_name)
 
     assert issubclass(mod.UnimportedClass, ABase)
+    del sys.modules[mod_name]
 
 
 def test_issubclass(Base):

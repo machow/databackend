@@ -62,3 +62,61 @@ class AbstractBackend(metaclass=_AbstractBackendMeta):
                     return True
 
         return NotImplemented
+
+
+# LazyImport --------
+# lazy import class ----
+
+import importlib  # noqa
+from types import ModuleType  # noqa
+
+
+class LazyImport(ModuleType):
+    """Lazily represents an imported module.
+
+    Parameters
+    ----------
+    name :
+        The name of the module to import.
+    fast :
+        If True, the module's attributes will be set on this instance after import, so
+        they can be imported without calling this class's `__getattr__` method.
+
+        This assumes that the module does not update its attributes after import.
+    debug :
+        If True, raise an error instead of importing the module. This allows you to see
+        what exactly triggers imports.
+
+    Examples
+    --------
+
+    >>> pl = LazyImport("polars")            # no import yet
+    >>> def my_func():
+    ...     return pl.DataFrame({"x": [1]})  # imports polars on first use
+    """
+
+    def __init__(self, name: str, fast: bool = False, debug: bool = False):
+        self.__mod: ModuleType | None = None
+
+        self.__name = name
+        self.__fast = fast
+        self.__debug = debug
+
+    def __getattr__(self, name: str):
+        if self.__mod is None:
+            self.__mod = self.__import()
+
+        return getattr(self.__mod, name)
+
+    def __import(self) -> ModuleType:
+        if self.__debug:
+            raise ImportError(
+                f"Lazy import of `{self.__name}` is disabled for debugging purposes."
+            )
+
+        mod = importlib.import_module(self.__name)
+
+        if self.__fast:
+            self.__dict__.update(mod.__dict__)
+
+        return mod
